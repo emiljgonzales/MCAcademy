@@ -1,0 +1,129 @@
+<html>
+  <body>
+    <script runat="server" language="Javascript">
+      Platform.Load("core", "1.1.1");
+      var api = new Script.Util.WSProxy();
+      var customerKey = "Journey_Names_Emil";
+      var columns = [
+        "activityinstanceid",
+        "activitycustomerkey",
+        "automationname",
+        "activityinstancestatus"
+      ];
+      var filter = null;
+      var opts = {
+        BatchSize: 2000
+      };
+      var props = {
+        QueryAllAccounts: false
+      };
+      try {
+        var journeyValues = retrieveAllAutomationName(customerKey, columns, filter, opts, props);
+        var count = 0;
+        var message = (count > 0) ? "You have successfully Updated <br>" + count + "</b> Records." : "No records Updated";
+        Variable.SetValue("@variable", Stringify(journeyValues.length));
+      }
+      catch (e) {
+        Variable.SetValue("@variable", e.message);
+      }
+      function updateDataExtensionStatus(DEName, Id, Status) {
+        var props = [
+          {
+            "Name": "Id",
+            "Value": Id
+          }
+          ,
+          {
+            "Name": "Status",
+            "Value": Status
+          }
+        ];
+        var result = api.updateItem('DataExtensionObject', {
+          CustomerKey: DEName,
+          Properties: props
+        });
+        return result;
+      }
+      function retrieveAllAutomationName(DEName, cols, filter, opts, props) {
+        var data = [];
+        var moreData = true;
+        var reqID = null;
+        
+        while (moreData) {
+          moreData = false;
+          
+          if(reqID) props.ContinueRequest = reqID;
+          //var result = (reqID == null) ?
+          //  api.retrieve("DataExtensionObject[" + DEName + "]", cols) : api.getNextBatch("DataExtensionObject[" + DEName + "]", reqID);
+          var result = api.retrieve("DataExtensionObject[" + DEName + "]", cols, filter, opts, props);
+          
+          if (result && result.Results) {
+            moreData = result.HasMoreRows;
+            reqID = result.RequestID;
+        
+            for (var i = 0; i < result.Results.length; i++) {
+              data.push(result.Results[i]);
+            }
+          }
+          // if (result != null) {
+          //     moreData = result.HasMoreRows;
+          //     reqID = result.RequestID;
+          //     if (result && result.Results) {
+          //         for (var i = 0; i < result.Results.length; i++) {
+          //             data.push(result.Results[i]);
+          //         }
+          //     }
+          // }
+        }
+        return data;
+      }
+      function retrieveStatus(AutomationName) {
+        columns = ["Name", "CustomerKey", "Status"];
+        filter = {
+          Property: "Name",
+          SimpleOperator: "equals",
+          Value: AutomationName
+        };
+        var request = api.retrieve("Automation", columns, filter);
+        response = request.Results[0].Status;
+        var status = "";
+        switch (response) {
+          case -1:
+            status = "Error";
+            break;
+          case 0:
+            status = "Building error";
+            break;
+          case 1:
+            status = "Building";
+            break;
+          case 2:
+            status = "Ready";
+            break;
+          case 3:
+            status = "Running";
+            break;
+          case 4:
+            status = "Paused";
+            break;
+          case 5:
+            status = "Stopped";
+            break;
+          case 6:
+            status = "Scheduled";
+            break;
+          case 7:
+            status = "Awaiting Trigger";
+            break;
+          case 8:
+            status = "Inactive Trigger";
+            break;
+                        }
+        return status;
+      }
+    </script>
+    <p>
+      %%=v(@variable)=%%
+    </p>
+  </body>
+</html>
