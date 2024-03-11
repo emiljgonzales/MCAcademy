@@ -8,15 +8,15 @@
 
     var post = Platform.Function.ParseJSON(Platform.Request.GetPostData('utf-8'));
 
-    if(post != null) {
+    if (post != null) {
         HTTPHeader.SetValue("Content-Type", "application/json");
         Variable.SetValue("ContentJson", "True");
     }
 
     try {
-        Write(Stringify(post));
-        Write("test");
-        if(post == null) return;
+        //Write(Stringify(post));
+        //Write("test");
+        if (post == null) return;
 
         var res = [];
 
@@ -34,11 +34,11 @@
             QueryAllAccounts: false
         };
 
-        if(post.reqID) props.ContinueRequest = post.reqID;
+        if (post.reqID) props.ContinueRequest = post.reqID;
 
         var req = api.retrieve("DataExtension", ["Name"], filter, opts, props);
-        Write(Stringify(req));
-        if(req) {
+        //Write(Stringify(req));
+        if (req) {
 
             var results = req.Results;
 
@@ -55,8 +55,8 @@
         } else {
             throw req;
         }
-        
-    } catch(error) {
+
+    } catch (error) {
 
         Write(Stringify({
             status: 500,
@@ -69,14 +69,16 @@
 %%[IF @ContentJson != "True" THEN]%%
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
 </head>
+
 <body>
-    
+
     <table x-data="myApp()">
         <tr>
             <th>Number</th>
@@ -103,11 +105,11 @@
                 },
                 async performRequests() {
 
-                    while(this.status != 200) {
+                    while (this.status != 200) {
 
                         let req = await this.performSingleRequest(this.reqID);
 
-                        if(req.status == 500) break;
+                        if (req.status == 500) break;
 
                         this.status = req.status;
                         this.reqID = req.reqID;
@@ -120,7 +122,7 @@
                 },
                 async performSingleRequest(reqID) {
 
-                    return await (await fetch("%%=RequestParameter('PAGEURL')=%%", { method: "POST", body: JSON.stringify({ reqID: reqID }) } )).json();
+                    return await (await fetch("%%=RequestParameter('PAGEURL')=%%", { method: "POST", body: JSON.stringify({ reqID: reqID }) })).json();
 
                 }
             }
@@ -128,35 +130,36 @@
         }
 
         try {
-		
-        var referer = Platform.Request.ReferrerURL;
-        var regex = /^(https:\/\/(.*\.)?((myawesomeform)\.com))($|\/)/g;
-        var match = referer.match(regex);
-        var origin = (match.length > 0) ? match[1] : null;
-    
-        if (origin != null) {
-    
-            HTTPHeader.SetValue('Access-Control-Allow-Methods', 'POST');
-            HTTPHeader.SetValue('Access-Control-Allow-Origin', origin);
-            Platform.Response.SetResponseHeader('Strict-Transport-Security', 'max-age=200');
-            Platform.Response.SetResponseHeader('X-XSS-Protection', '1; mode=block');
-            Platform.Response.SetResponseHeader('X-Frame-Options', 'Deny');
-            Platform.Response.SetResponseHeader('X-Content-Type-Options', 'nosniff');
-            Platform.Response.SetResponseHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-            Platform.Response.SetResponseHeader('Content-Security-Policy', "default-src 'self'");
-    
-        } else {
-            throw "Wrong origin";
+
+            var referer = Platform.Request.ReferrerURL;
+            var regex = /^(https:\/\/(.*\.)?((myawesomeform)\.com))($|\/)/g;
+            var match = referer.match(regex);
+            var origin = (match.length > 0) ? match[1] : null;
+
+            if (origin != null) {
+
+                HTTPHeader.SetValue('Access-Control-Allow-Methods', 'POST');
+                HTTPHeader.SetValue('Access-Control-Allow-Origin', origin);
+                Platform.Response.SetResponseHeader('Strict-Transport-Security', 'max-age=200');
+                Platform.Response.SetResponseHeader('X-XSS-Protection', '1; mode=block');
+                Platform.Response.SetResponseHeader('X-Frame-Options', 'Deny');
+                Platform.Response.SetResponseHeader('X-Content-Type-Options', 'nosniff');
+                Platform.Response.SetResponseHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+                Platform.Response.SetResponseHeader('Content-Security-Policy', "default-src 'self'");
+
+            } else {
+                throw "Wrong origin";
+            }
+
+        } catch (error) {
+
+            Write(Stringify({ status: "Error", message: error }));
+
         }
-		
-    } catch(error) {
-    
-        Write(Stringify({ status: "Error", message: error }));
-    
-    } 	
 
     </script>
 
 </body>
+
 </html>
 %%[ENDIF]%%
