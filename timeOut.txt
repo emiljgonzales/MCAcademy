@@ -127,13 +127,7 @@
 
         }
 
-    </script>
-
-<script runat='server'>
-
-    Platform.Load('core', '1.1.1');
-    
-    try {
+        try {
 		
         var referer = Platform.Request.ReferrerURL;
         var regex = /^(https:\/\/(.*\.)?((myawesomeform)\.com))($|\/)/g;
@@ -155,14 +149,13 @@
             throw "Wrong origin";
         }
 		
-		/// DO SOMETHING
-		
     } catch(error) {
     
         Write(Stringify({ status: "Error", message: error }));
     
-    } 		
-</script>
+    } 	
+
+    </script>
 
 </body>
 </html>
