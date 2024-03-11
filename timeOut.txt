@@ -14,8 +14,7 @@
     }
 
     try {
-        //Write(Stringify(post));
-        //Write("test");
+        
         if (post == null) return;
 
         var res = [];
@@ -37,7 +36,7 @@
         if (post.reqID) props.ContinueRequest = post.reqID;
 
         var req = api.retrieve("DataExtension", ["Name"], filter, opts, props);
-        //Write(Stringify(req));
+        
         if (req) {
 
             var results = req.Results;
