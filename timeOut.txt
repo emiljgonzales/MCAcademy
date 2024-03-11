@@ -14,7 +14,8 @@
     }
 
     try {
-
+        Write(Stringify(post));
+        Write("test");
         if(post == null) return;
 
         var res = [];
